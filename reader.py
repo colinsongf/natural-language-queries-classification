@@ -23,9 +23,9 @@ class Reader:
 				count_answer = 0
 				for answer in answers.find_all("answer"):
 					count_answer = count_answer + 1
-				whtype = question.whtype.get_text()	
+				# whtype = question.whtype.get_text()	
 				temp.append(count_answer)
-				temp.append(whtype)
+				# temp.append(whtype)
 				triple.append(temp)
 			except:
 				continue

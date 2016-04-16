@@ -35,6 +35,12 @@ class Features:
 	def __init__(self):
 		print "Features.__init__: Initializing the featureset computation module"
 		self.nlp = StanfordCoreNLP(STANFORD_CORENLP_URL)
+		self.wh_type_mapper = { 
+								'which' 	: 0,
+		 						'what' 		: 1,
+		 						'how many'	: 2,
+		 						'who'		: 3		
+		 					  }
 
 		#Try to see if the URL is live
 		try:
@@ -80,7 +86,7 @@ class Features:
 
 			featureset = []
 			featureset.append(self._feature_number_of_tokens(parsed_query))
-			# featureset.append(self._feature_is_comparative(data_node))
+			featureset.append(self._feature_wh_type(data_node[3]))
 			# featureset.append(self._feature_is_superlative(data_node))
 			featureset.append(self._feature_ner_has_person(parsed_tokens_ners))
 			featureset.append(self._feature_ner_num_person(parsed_tokens_ners))
@@ -116,7 +122,13 @@ class Features:
 
 	def _feature_wh_type(self, data_wh_type):
 		#The wh-type of the query, as decided by the NQS library
-		pass
+		try:
+			wh_code = self.wh_type_mapper[data_wh_type]
+		except KeyError:
+			wh_code = len(self.wh_type_mapper)
+			self.wh_type_mapper[data_wh_type] = len(self.wh_type_mapper)
+
+		return wh_code
 
 	def _feature_ner_has_person(self, parsed_tokens_ners):
 		#Does the query have a single Person named entity?
@@ -231,15 +243,15 @@ class NLQClassifier:
 if __name__ == "__main__":
 	nlq = NLQClassifier()
 
-	# queries = [ 
-	# 	'Who let the dogs out?', 
-	# 	'How many roads must a man walk down?', 
-	# 	'Who will keep up with the Joneses?', 
-	# 	'How long is the nile river?', 
-	# 	'Do you even lift bro?', 
-	# 	'Who did Barack Obama marry?', 
-	# 	'Since when is Barack Obama in United States of America?'
-	# ]
+	queries = [ 
+		['Who let the dogs out?', '', '', 'who'],
+		['How many roads must a man walk down?','','','how many'], 
+		['Who will keep up with the Joneses?','','','which'], 
+		['How long is the nile river?','','','which' ],
+		['Do you even lift bro?', '','','which'],
+		['Who did Barack Obama marry?', '', '', 'how many' ],
+		['Since when is Barack Obama in United States of America?','','','how many']
+	]
 
-	# for query in queries:
-	# 	nlq.predict_question_cluster(query)
+	for query in queries:
+		nlq.predict_question_cluster(query)
