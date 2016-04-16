@@ -56,11 +56,13 @@ class Features:
 		'''
 		
 		#First verify the data node's structure
-		if data_node.__class__ == ''.__class__:
+		if data_node.__class__ == [].__class__:
+
+			data_query = data_node[0]
 
 			#Get it annotated by StanfordCoreNLP
 			try:
-				parsed_query = self.nlp.annotate( data_node, properties = 
+				parsed_query = self.nlp.annotate( data_query, properties = 
 											{
 												'annotators': 'tokenize,pos,ner',
 												'outputFormat': 'json'
@@ -110,6 +112,10 @@ class Features:
 
 	def _feature_is_superlative(self, data_node):
 		#Is the question superlative
+		pass
+
+	def _feature_wh_type(self, data_wh_type):
+		#The wh-type of the query, as decided by the NQS library
 		pass
 
 	def _feature_ner_has_person(self, parsed_tokens_ners):
@@ -195,9 +201,9 @@ class NLQClassifier:
 		self.X = []
 		self.Y = []
 		for data_node in sparql_cluster_data:
-			x = self.featureset_computer.get_feature_set(data_node[0])
+			x = self.featureset_computer.get_feature_set(data_node)
 			self.X.append(x)
-			self.Y.append(data_node[4])
+			self.Y.append(data_node[5])
 
 		### DEBUG
 		# for i in range(len(self.X)):
@@ -225,15 +231,15 @@ class NLQClassifier:
 if __name__ == "__main__":
 	nlq = NLQClassifier()
 
-	queries = [ 
-		'Who let the dogs out?', 
-		'How many roads must a man walk down?', 
-		'Who will keep up with the Joneses?', 
-		'How long is the nile river?', 
-		'Do you even lift bro?', 
-		'Who did Barack Obama marry?', 
-		'Since when is Barack Obama in United States of America?'
-	]
+	# queries = [ 
+	# 	'Who let the dogs out?', 
+	# 	'How many roads must a man walk down?', 
+	# 	'Who will keep up with the Joneses?', 
+	# 	'How long is the nile river?', 
+	# 	'Do you even lift bro?', 
+	# 	'Who did Barack Obama marry?', 
+	# 	'Since when is Barack Obama in United States of America?'
+	# ]
 
-	for query in queries:
-		nlq.predict_question_cluster(query)
+	# for query in queries:
+	# 	nlq.predict_question_cluster(query)
