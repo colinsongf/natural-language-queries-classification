@@ -1,5 +1,6 @@
 from pprint import pprint
 from xml.etree.ElementTree import Element, SubElement, Comment, tostring
+import xml.dom.minidom
 # import json
 import pickle
 
@@ -13,15 +14,21 @@ class Dumper:
 		# print _object_list
 
 		for q in _object_list:
-			obj_list = 	SubElement(parent, 'question')
 			for key in q:
-				element = SubElement(obj_list, key)
-				print q[key]
-				try:
+				if key == "questionid":
+					print "here"
+					obj_list = 	SubElement(parent, 'QALDquestions')
+					obj_list.set('id',str(q[key]))
+			for key in q:
+				if key != "questionid":
+					print key
+					element = SubElement(obj_list, key)
+					print q[key]
+					# try:
 					text = str(q[key])
-				except:
-					text = q[key].encode('utf-8').strip()
-				element.text = text
+					# except:
+					# 	text = q[key].encode('utf-8').strip()
+					element.text = text
 
 		#Dump the XML object
 			

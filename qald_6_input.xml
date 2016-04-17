@@ -2374,7 +2374,7 @@
 <NLQueryFeature>RESOURCE	null	Which	9	null	true	false	true	false	false	false	false</NLQueryFeature>
 </QALDquestions>
 <QALDquestions id="321">
-<Ques>Is Darth Vader Luke’s father?</Ques>
+<Ques>Is Darth Vader Luke's father?</Ques>
 <NQS>[Concepts] = [father, Darth Vader Luke], [Roles] = [of]</NQS>
 <NER>[O, PERSON, PERSON, PERSON, O, O, O]</NER>
 <SPARQLFeature>[4, 2, 0]</SPARQLFeature>

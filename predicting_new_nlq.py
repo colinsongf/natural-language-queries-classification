@@ -8,8 +8,11 @@ from bs4 import BeautifulSoup
 import traceback
 import pickle
 import sys
-
-from clustering_nlquerties import NLQClassifier
+import traceback
+import sys
+reload(sys)
+sys.setdefaultencoding('utf-8')
+from clustering_nlqueries import NLQClassifier
 from dumping_output import Dumper
 
 class Reader:
@@ -39,7 +42,9 @@ class Reader:
 						'nlqueryfeature':question_nlqueryfeature
 						}
 				triple.append(temp)
-			except:
+			except Exception, err:
+				print "here"
+				print traceback.format_exc()
 				continue
 
 		return triple
@@ -55,9 +60,9 @@ except:
 	sys.exit()
 
 #We have the classifier, now let's get the queries
-query_reader = reader.Reader()
+query_reader = Reader()
 query_list = query_reader.get_parsed_queries()
-
+print query_list
 #We got the queries. Now we need to use the NLQClassifier's feature parsing function to parse these features
 nl_feature_parser = NLQClassifier()
 
