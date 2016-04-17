@@ -2,15 +2,15 @@ from pycorenlp import StanfordCoreNLP
 from sklearn.naive_bayes import GaussianNB
 from pprint import pprint 
 import traceback
-import requests
+# import requests
 import pickle
 import numpy
-import ujson
 import sys
 
 #SOME MACROS
-STANFORD_CORENLP_URL = 'http://localhost:9000'
+# STANFORD_CORENLP_URL = 'http://localhost:9000'
 
+#NOT USED FOR QALD 6 (Features come from the Java module)
 class Features:
 	'''
 		The class responsible to convert a data node into a set of features, responsible for clustering NL queries
@@ -86,7 +86,7 @@ class Features:
 
 			featureset = []
 			featureset.append(self._feature_number_of_tokens(parsed_query))
-			featureset.append(self._feature_wh_type(data_node[3]))
+			# featureset.append(self._feature_wh_type(data_node[3]))
 			# featureset.append(self._feature_is_superlative(data_node))
 			featureset.append(self._feature_ner_has_person(parsed_tokens_ners))
 			featureset.append(self._feature_ner_num_person(parsed_tokens_ners))
@@ -206,16 +206,32 @@ class NLQClassifier:
 			print "Something went wrong. Quitting"
 			sys.exit()
 
+		self.question_type_mapper = {
+										'list' : 0,
+										'resource' : 1,
+										'number': 2,
+										'boolean': 3
+									}
+
+		self.wh_type_mapper = { 
+								'which' 	: 0,
+		 						'what' 		: 1,
+		 						'how many'	: 2,
+		 						'who'		: 3		
+		 					  }
+
 		#Stamp out a featureset computer
-		self.featureset_computer = Features()
+		# self.featureset_computer = Features()
 
 		#Get an array of feature representation of the data
 		self.X = []
 		self.Y = []
 		for data_node in sparql_cluster_data:
-			x = self.featureset_computer.get_feature_set(data_node)
+			x = self.feature_string_parser( data_node['nlqueryfeature'] )
+			# print x
+			# raw_input()
 			self.X.append(x)
-			self.Y.append(data_node[5])
+			self.Y.append(data_node['cluster_id'])
 
 		### DEBUG
 		# for i in range(len(self.X)):
@@ -232,6 +248,62 @@ class NLQClassifier:
 
 		print "Completed classifying NL Queries"
 
+		#Pickle the classifier to be used by other modules
+
+		classifier_file = open('nlclassifier.dump')
+		pickle.dump(self.classifier, classifier_file)
+		classifier_file.close()
+
+
+	def feature_string_parser(self, features):
+		print features.replace('	','|')
+		feature_list = []
+		features =  features.replace('[','').replace(']','').split('	')
+		
+
+		#Feature0
+		try:
+			feature0 = self.question_type_mapper[features[0].lower().strip()]
+		except:
+			feature0 = len(self.question_type_mapper)
+			self.question_type_mapper[features[0].lower().strip()] = len(self.question_type_mapper)
+
+		#Feature1
+		feature1 = 0 if features[1] == u'null' else 1
+		if not feature1 == 0:
+			print features
+			raw_input("Got a non null value at 1")
+
+		#Feature2
+		try:
+			feature2 = self.wh_type_mapper[features[2].lower().strip()]
+		except KeyError:
+			print features[2].lower().strip()
+			feature2 = len(self.wh_type_mapper)
+			self.wh_type_mapper[features[2].lower().strip()] = len(self.wh_type_mapper)
+
+		#Feature3
+		feature3 = int(features[3])
+
+		#Feature4
+		feature4 = 0 if features[4] == u'null' else 1
+		if not feature4 == 0:
+			print features
+			raw_input("Got a non null value at 3")
+
+		#Feature4
+		# feature4 = 1 if feature[4] == 'true' else 0
+		feature5 = 1 if features[5] == 'true' else 0
+		feature6 = 1 if features[6] == 'true' else 0
+		feature7 = 1 if features[7] == 'true' else 0
+		feature8 = 1 if features[8] == 'true' else 0
+		feature9 = 1 if features[9] == 'true' else 0
+		feature10 = 1 if features[10] == 'true' else 0
+		feature11 = 1 if features[11] == 'true' else 0
+
+		print '|'.join([str(feature0),str(feature1),str(feature2),str(feature3),str(feature4),str(feature5),str(feature6),str(feature7),str(feature8),str(feature9),str(feature10),str(feature11)])
+		return [feature0,feature1,feature2,feature3,feature4,feature5,feature6,feature7,feature8,feature9,feature10,feature11]
+
 	def predict_question_cluster(self, query):
 		x = self.featureset_computer.get_feature_set(query)
 
@@ -243,15 +315,15 @@ class NLQClassifier:
 if __name__ == "__main__":
 	nlq = NLQClassifier()
 
-	queries = [ 
-		['Who let the dogs out?', '', '', 'who'],
-		['How many roads must a man walk down?','','','how many'], 
-		['Who will keep up with the Joneses?','','','which'], 
-		['How long is the nile river?','','','which' ],
-		['Do you even lift bro?', '','','which'],
-		['Who did Barack Obama marry?', '', '', 'how many' ],
-		['Since when is Barack Obama in United States of America?','','','how many']
-	]
+	# queries = [ 
+	# 	['Who let the dogs out?', '', '', 'who'],
+	# 	['How many roads must a man walk down?','','','how many'], 
+	# 	['Who will keep up with the Joneses?','','','which'], 
+	# 	['How long is the nile river?','','','which' ],
+	# 	['Do you even lift bro?', '','','which'],
+	# 	['Who did Barack Obama marry?', '', '', 'how many' ],
+	# 	['Since when is Barack Obama in United States of America?','','','how many']
+	# ]
 
-	for query in queries:
-		nlq.predict_question_cluster(query)
+	# for query in queries:
+	# 	nlq.predict_question_cluster(query)

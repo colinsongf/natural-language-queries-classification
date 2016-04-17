@@ -47,7 +47,7 @@ class Features:
 		'''
 		
 		#First verify the data node's structure
-		if data_node.__class__ == [].__class__ and len(data_node) == 3 and data_node[0].__class__ == ''.__class__ and data_node[1].__class__ == ''.__class__:
+		if data_node.__class__ == {}.__class__:
 			
 			featureset = []
 			featureset.append(self._feature_number_of_triples(data_node))
@@ -129,7 +129,7 @@ class SPARQLClassifier:
 		self.query_list = query_reader.get_parsed_queries()
 
 		#Stamp out a feature set creator
-		query_featureset_computer = Features()
+		# query_featureset_computer = Features()	#NOT REQUIRED AS INPUT ALREADY HAS THE FEATURESET
 
 		#Stamp out a KMean clusterer
 		self.kmeans = KMeans(n_clusters = NUMBER_OF_CLUSTERS, max_iter = 1000)
@@ -139,15 +139,12 @@ class SPARQLClassifier:
 		#Taking each element as a datanode, construct a numpy array
 		self.X = []
 		for data_node in self.query_list:
-			x = query_featureset_computer.get_feature_set(data_node)
+			# x = query_featureset_computer.get_feature_set(data_node)
+			x = data_node['sparqlfeature']
+			
+			xlist = [ int(number) for number in x.replace('[','').replace(']','').split(',')]
 
-			# ##DEBUG
-			# pprint(data_node)
-			# pprint(x)
-			# raw_input()
-			# ##DEBUG
-
-			self.X.append(x)
+			self.X.append(xlist)
 		self.X = numpy.array(self.X)		#X now contains a feature based representation of queries.
 
 		#Use a KMean clusterer to cluster these things
@@ -166,8 +163,7 @@ class SPARQLClassifier:
 		number_of_data_nodes = len(self.query_list)
 
 		for i in range(number_of_data_nodes):
-			self.query_list[i].append(self.X[i])
-			self.query_list[i].append(self.kmeans.labels_[i])
+			self.query_list[i]['cluster_id'] = self.kmeans.labels_[i]
 
 		print "About to dump shit"
 
@@ -175,8 +171,6 @@ class SPARQLClassifier:
 		file_obj = open("query_list.txt","w+")
 		pickle.dump(self.query_list, file_obj)
 		file_obj.close()
-
-
 
 if __name__ == "__main__":
 	classifier = SPARQLClassifier()
