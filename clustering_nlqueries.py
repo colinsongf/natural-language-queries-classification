@@ -197,15 +197,6 @@ class NLQClassifier:
 
 	def __init__(self):
 
-		#Unpickle the computed data (as dumped by clustering SPARQL)
-		try:
-			data_file = open('query_list.txt','r')
-			sparql_cluster_data = pickle.load(data_file)
-		except:
-			print traceback.format_exc()
-			print "Something went wrong. Quitting"
-			sys.exit()
-
 		self.question_type_mapper = {
 										'list' : 0,
 										'resource' : 1,
@@ -219,6 +210,16 @@ class NLQClassifier:
 		 						'how many'	: 2,
 		 						'who'		: 3		
 		 					  }
+	def train(self):
+
+		#Unpickle the computed data (as dumped by clustering SPARQL)
+		try:
+			data_file = open('query_list.txt','r')
+			sparql_cluster_data = pickle.load(data_file)
+		except:
+			print traceback.format_exc()
+			print "Something went wrong. Quitting"
+			sys.exit()		
 
 		#Stamp out a featureset computer
 		# self.featureset_computer = Features()
@@ -250,7 +251,7 @@ class NLQClassifier:
 
 		#Pickle the classifier to be used by other modules
 
-		classifier_file = open('nlclassifier.dump')
+		classifier_file = open('nlclassifier.dump','w+')
 		pickle.dump(self.classifier, classifier_file)
 		classifier_file.close()
 
@@ -314,6 +315,7 @@ class NLQClassifier:
 
 if __name__ == "__main__":
 	nlq = NLQClassifier()
+	nlq.train()
 
 	# queries = [ 
 	# 	['Who let the dogs out?', '', '', 'who'],

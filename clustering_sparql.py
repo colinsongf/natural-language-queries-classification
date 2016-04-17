@@ -6,6 +6,7 @@ from pprint import pprint
 from sklearn.cluster import KMeans
 
 #Import our files
+from dumping_output import Dumper
 import reader
 
 #Some macros
@@ -172,6 +173,9 @@ class SPARQLClassifier:
 		pickle.dump(self.query_list, file_obj)
 		file_obj.close()
 
+		#Also, dump this as an XML Object
+		dumper = Dumper()
+		dumper.dump(self.query_list, 'qald_6_output.xml')
 if __name__ == "__main__":
 	classifier = SPARQLClassifier()
 	classifier.generate_clustered_query_list()
